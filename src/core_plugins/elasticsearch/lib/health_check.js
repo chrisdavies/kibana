@@ -3,6 +3,7 @@ import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 import { patchKibanaIndex } from './patch_kibana_index';
+import { isIndexMigrated } from '../../../server/migrations';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 
@@ -34,6 +35,14 @@ export default function (plugin, server) {
     });
   }
 
+  async function verifyMigrationStatus() {
+    const isMigrated = await isIndexMigrated({ server, index: '.kibana' });
+    if (!isMigrated) {
+      plugin.status.red('The ".kibana" index is out of date and needs to be migrated.');
+      return Promise.delay(REQUEST_DELAY).then(verifyMigrationStatus);
+    }
+  }
+
   function setGreenStatus() {
     return plugin.status.green('Ready');
   }
@@ -47,7 +56,8 @@ export default function (plugin, server) {
           log: (...args) => server.log(...args),
           indexName: config.get('kibana.index'),
           kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-        }));
+        }))
+        .then(verifyMigrationStatus);
 
     return healthCheck
       .then(setGreenStatus)
