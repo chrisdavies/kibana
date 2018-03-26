@@ -4,7 +4,7 @@ const { generateMigration } = require('./generate_migration');
 
 generateMigration('mapping', (id) => `
 // Uniquely identifies this migration
-export const id = ${JSON.stringify(id)};
+export const id = '${id}';
 
 // Returns a mapping definition to be added to the Elasticsearch
 // index that is being migrated.

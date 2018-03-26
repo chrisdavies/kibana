@@ -41,7 +41,8 @@ export async function generateMigration(type, templateFn) {
 }
 
 function migrationId(type, fileName) {
-  return `${moment().format('YYYYMMDDHHmmss')}-${type}-${dropExtension(fileName)}`;
+  return `${moment().format('YYYYMMDDHHmmss')}_${type}_${dropExtension(fileName)}`
+    .replace('\'', '\\\'');
 }
 
 function migrationFolder(pluginPath) {

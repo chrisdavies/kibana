@@ -4,7 +4,7 @@ const { generateMigration } = require('./generate_migration');
 
 generateMigration('transform', (id) => `
 // Uniquely identifies this migration
-export const id = ${JSON.stringify(id)};
+export const id = '${id}';
 
 // Determine whether or not this migration applies to the specified document.
 export function filter(doc) {

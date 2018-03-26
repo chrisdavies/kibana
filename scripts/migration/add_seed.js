@@ -4,7 +4,7 @@ const { generateMigration } = require('./generate_migration');
 
 generateMigration('seed', (id) => `
 // Uniquely identifies this seed file
-export const id = ${JSON.stringify(id)};
+export const id = '${id}';
 
 // Returns a document to be upserted to the Elasticsearch index being migrated
 export function seed() {

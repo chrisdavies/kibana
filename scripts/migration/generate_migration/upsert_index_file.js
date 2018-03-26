@@ -39,7 +39,7 @@ async function createIndexFile(filePath, id) {
 }
 
 function generateRequireStatement(id) {
-  return `require(${JSON.stringify('./' + id)}),`;
+  return `require('${'./' + id}'),`;
 }
 
 function indexTemplate(id) {
