@@ -187,8 +187,8 @@ export async function bulkInsert(client, log, index, docs) {
  * and create an alias named sourceIndex that points to destIndex.
  *
  * @param {ElasticsearchJs} client The Elasticsearch client.
- * @param {string} sourceIndex The name of the source index.
- * @param {string} destIndex The name of the destination index.
+ * @param {string} sourceIndex The name of the source index, which will become the name of the alias.
+ * @param {string} destIndex The name of the index to which sourceIndex will be cloned.
  * @returns {Promise}
  */
 export async function convertIndexToAlias(client, sourceIndex, destIndex) {
@@ -289,7 +289,7 @@ export async function fetchUnappliedMigrations({ client, plugins, index }) {
  * @param {function} eachFn A function that takes the results of a scroll operation and does something effectful
  * @param {number} [size=100] The number of documents to process at a time
  */
-async function eachScroll(client, index, eachFn, size = 100) {
+export async function eachScroll(client, index, eachFn, size = 100) {
   const scroll = '1m';
   let result = await client.search({ index, scroll, body: { size } });
 
@@ -309,6 +309,9 @@ async function eachScroll(client, index, eachFn, size = 100) {
  */
 function reindex(client, sourceIndex, destIndex) {
   return client.reindex({
+    waitForCompletion: true,
+    waitForActiveShards: 'all',
+    refresh: true,
     body: {
       source: {
         index: sourceIndex,
