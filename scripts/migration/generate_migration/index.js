@@ -27,8 +27,8 @@ export async function generateMigration(type, templateFn) {
   const fileName = process.argv[FILE_NAME_INDEX];
   const pluginPath = process.argv[PLUGIN_PATH_INDEX];
   const dir = migrationFolder(pluginPath);
-  const migrationFilePath = path.join(dir, migrationFileName(type, fileName));
   const id = migrationId(type, fileName);
+  const migrationFilePath = path.join(dir, migrationFileName(id, fileName));
 
   console.log(`Generating: "${migrationFilePath}"...`);
 
@@ -49,7 +49,6 @@ function migrationFolder(pluginPath) {
   return path.resolve(path.join(pluginPath, 'migrations'));
 }
 
-function migrationFileName(type, fileName) {
-  const extension = path.extname(fileName) || '.js';
-  return migrationId(type, fileName) + extension;
+function migrationFileName(id, fileName) {
+  return id + (path.extname(fileName) || '.js');
 }
