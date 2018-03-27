@@ -118,7 +118,7 @@ export function migrationLogger(server) {
 
     // Temporarily change this to info, to see migration debug logs without
     // all the noise of normal Kibana debug logs.
-    debug: logFn(['info', 'migration']),
+    debug: logFn(['debug', 'migration']),
   };
 }
 
