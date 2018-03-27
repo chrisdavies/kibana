@@ -10,8 +10,8 @@ export { migrate } from './migrate';
  * @returns {boolean} - if true: the index is up to date / migrated, false: the index needs to be migrated
  */
 export async function isIndexMigrated(opts) {
-  const { client, index, plugins } = getMigrationContext(opts);
-  const storedChecksum = await fetchMigrationChecksum(client, index);
+  const { callCluster, index, plugins } = getMigrationContext(opts);
+  const storedChecksum = await fetchMigrationChecksum(callCluster, index);
   const currentChecksum = checksumMigrations(plugins);
   return storedChecksum === currentChecksum;
 }
@@ -32,6 +32,7 @@ export async function dryRun(opts) {
  * @typedef {Object} MigrationOpts
  * @property {KibanaServer} server - The Kibana server object used for communication w/ elasticsearch, accessing plugins, and for logging
  * @property {string} index - The name of the Elasticsearch index being migrated
+ * @property {function} callCluster - The function used to call elastic. Should conform to the signature of callWithInternalUser (see cluster.js)
  */
 
 /**

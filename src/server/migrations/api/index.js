@@ -1,39 +1,51 @@
-// The API endpoint for migrations
+// The API endpoint for Kibana index migrations
 import { dryRun, migrate, isIndexMigrated } from '../lib';
 
 export function migrationsMixin(kbnServer, server) {
-  // Checks the migration status for the specified index.
+  const index = server.config().get('kibana.index');
+
+  function buildOpts(request) {
+    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+
+    return {
+      index,
+      server,
+      callCluster(...args) {
+        return callWithRequest(request, ...args);
+      },
+    };
+  }
+
+  // Checks the migration status for the Kibana index.
   // Returns: {index: string, upToDate: boolean}
   server.route({
-    path: '/api/migrations/{index}/status',
+    path: '/api/migrations/status',
     method: 'GET',
     handler: async (request, reply) => {
-      const { index } = request.params;
-      const isMigrated = await isIndexMigrated({ server, index });
+      const opts = buildOpts(request);
+      const isMigrated = await isIndexMigrated(opts);
       return reply({ index, isMigrated });
     },
   });
 
-  // Migrates the specified index. If the index was already
+  // Migrates the Kibana index. If the index was already
   // migrated, this returns no destIndex.
   server.route({
-    path: '/api/migrations/{index}',
+    path: '/api/migrations',
     method: 'POST',
     handler: async (request, reply) => {
-      const { index } = request.params;
-      const result = await migrate({ server, index });
+      const result = await migrate(buildOpts(request));
       return reply(result);
     },
   });
 
   // Retrieves the ids of all migrations which will be applied
-  // if the index is migrated.
+  // if the Kibana index is migrated.
   server.route({
-    path: '/api/migrations/{index}/dryrun',
+    path: '/api/migrations/dryrun',
     method: 'GET',
     handler: async (request, reply) => {
-      const { index } = request.params;
-      const result = await dryRun({ server, index });
+      const result = await dryRun(buildOpts(request));
       return reply(result);
     },
   });

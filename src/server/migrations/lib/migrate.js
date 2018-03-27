@@ -57,38 +57,38 @@ function skipMigration({ index, log }) {
   return { index, isSkipped: true };
 }
 
-async function runMigration({ index, destIndex, server, client, log, plugins }, migrations) {
+async function runMigration({ index, destIndex, server, callCluster, log, plugins }, migrations) {
   log.info(() => `Migrating from "${index}" to "${destIndex}".`);
   log.debug(() => `Preparing to run "${index}" migrations ${migrations.map(({ id }) => id).join(', ')}`);
 
   // This is a kibana index-specific call. It *shouldn't* hurt to invoke this
   // regardless of what index is being migrated.
   log.info(() => `Ensuring "${index}" exists.`);
-  await ensureKibanaIndexExists(server);
+  await ensureKibanaIndexExists(server, callCluster);
 
   log.info(() => `Ensuring "${index}" is an alias.`);
-  await convertIndexToAlias(client, index, `${index}-original`);
+  await convertIndexToAlias(callCluster, index, `${index}-original`);
 
   log.info(() => `Setting "${index}" to read-only.`);
-  await setReadonly(client, index, true);
+  await setReadonly(callCluster, index, true);
 
   log.info(() => `Creating "${destIndex}".`);
-  await cloneIndexSettings(client, index, destIndex);
+  await cloneIndexSettings(callCluster, index, destIndex);
 
   log.info(() => `Applying mappings to "${destIndex}".`);
-  await applyMappings(client, destIndex, migrations);
+  await applyMappings(callCluster, destIndex, migrations);
 
   log.info(() => `Applying seeds to "${destIndex}".`);
-  await applySeeds(client, log, destIndex, migrations);
+  await applySeeds(callCluster, log, destIndex, migrations);
 
   log.info(() => `Applying transforms to "${destIndex}".`);
-  await applyTransforms(client, log, index, destIndex, migrations);
+  await applyTransforms(callCluster, log, index, destIndex, migrations);
 
   log.info(() => `Saving migration state to "${destIndex}".`);
-  await saveMigrationState(client, destIndex, migrationState(plugins));
+  await saveMigrationState(callCluster, destIndex, migrationState(plugins));
 
   log.info(() => `Pointing alias "${index}" to "${destIndex}".`);
-  await setAlias(client, index, destIndex);
+  await setAlias(callCluster, index, destIndex);
 
   return { destIndex, index, isSkipped: false };
 }
@@ -96,9 +96,8 @@ async function runMigration({ index, destIndex, server, client, log, plugins }, 
 // Kibana-index-specific function that uses the saved objects client to ensure
 // the Kibana index exists prior to migrations. We need to create the index, as
 // seed and mappings migrations rely on the index existing.
-async function ensureKibanaIndexExists(server) {
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const savedObjectsClient = server.savedObjectsClientFactory({ callCluster: callWithInternalUser });
+async function ensureKibanaIndexExists(server, callCluster) {
+  const savedObjectsClient = server.savedObjectsClientFactory({ callCluster });
 
   try {
     await savedObjectsClient.create('migration', {

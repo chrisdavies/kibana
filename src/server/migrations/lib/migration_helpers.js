@@ -126,7 +126,7 @@ export function migrationLogger(server) {
  * Creates an a context object that is used to run migrations.
  * @param {MigrationOpts} opts
  */
-export function getMigrationContext({ server, index }) {
+export function getMigrationContext({ server, callCluster, index }) {
   const plugins = Object.keys(server.plugins)
     .map((id) => ({
       id,
@@ -136,10 +136,10 @@ export function getMigrationContext({ server, index }) {
 
   return {
     server,
+    callCluster,
     index,
     plugins,
     destIndex: `${index}-${moment().format('YYYYMMDDHHmmss')}`,
-    client: server.plugins.elasticsearch.getCluster('admin').getClient(),
     log: migrationLogger(server),
   };
 }
