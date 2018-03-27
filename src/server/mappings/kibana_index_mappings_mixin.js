@@ -24,6 +24,18 @@ const BASE_SAVED_OBJECT_MAPPINGS = {
           }
         }
       },
+      migration: {
+        properties: {
+          checksum: { type: 'keyword' },
+          plugins: {
+            type: 'nested',
+            properties: {
+              id: { type: 'keyword' },
+              appliedMigrations: { type: 'keyword' },
+            },
+          },
+        }
+      },
     }
   }
 };

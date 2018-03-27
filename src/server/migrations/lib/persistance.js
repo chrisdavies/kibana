@@ -2,7 +2,8 @@
 import { migrationPipeline, unappliedMigrations, seededDocs } from './migration_helpers';
 import { validatePluginState } from './validation';
 
-export const MIGRATION_DOC_ID = '.migration-state';
+export const MIGRATION_STATE_ID = 'migration-state';
+export const MIGRATION_DOC_ID = `migration:${MIGRATION_STATE_ID}`;
 export const DOC_TYPE = 'doc';
 
 /**

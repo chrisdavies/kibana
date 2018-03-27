@@ -135,10 +135,11 @@ export function getMigrationContext({ server, index }) {
     .filter(({ migrations }) => !!migrations);
 
   return {
+    server,
     index,
     plugins,
     destIndex: `${index}-${moment().format('YYYYMMDDHHmmss')}`,
-    client: server.plugins.elasticsearch.getCluster('data').getClient(),
+    client: server.plugins.elasticsearch.getCluster('admin').getClient(),
     log: migrationLogger(server),
   };
 }
