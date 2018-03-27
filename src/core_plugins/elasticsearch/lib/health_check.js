@@ -36,9 +36,10 @@ export default function (plugin, server) {
   }
 
   async function verifyMigrationStatus() {
-    const isMigrated = await isIndexMigrated({ server, index: '.kibana' });
+    const index = config.get('kibana.index');
+    const isMigrated = await isIndexMigrated({ server, index });
     if (!isMigrated) {
-      plugin.status.red('The ".kibana" index is out of date and needs to be migrated.');
+      plugin.status.red(`Index "${index}" is out of date and needs to be migrated.`);
       return Promise.delay(REQUEST_DELAY).then(verifyMigrationStatus);
     }
   }
