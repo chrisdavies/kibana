@@ -1,7 +1,7 @@
 // The primary logic for applying migrations to an index
 import moment from 'moment';
-import { migrationState, getMigrationContext } from './migration_helpers';
 import {
+  buildMigrationState,
   convertIndexToAlias,
   setReadonly,
   cloneIndexSettings,
@@ -10,9 +10,10 @@ import {
   applyTransforms,
   saveMigrationState,
   setAlias,
-  fetchUnappliedMigrations,
-  MIGRATION_STATE_ID,
-} from './persistance';
+  migrationContext,
+  ensureIndexExists,
+} from './lib';
+import { isIndexMigrated } from './is_index_migrated';
 
 /**
  * @typedef {{elapsedMs: number, index: string, destIndex: string, isSkipped: false} | {index: string, isSkipped: true}} MigrationResult
@@ -42,13 +43,13 @@ async function measureElapsedTime(fn) {
 }
 
 async function runMigrationIfOutOfDate(opts) {
-  const context = getMigrationContext(opts);
-  const migrations = await fetchUnappliedMigrations(context);
+  const context = await migrationContext(opts);
+  const isMigrated = await isIndexMigrated(opts);
 
-  if (migrations.length === 0) {
+  if (isMigrated) {
     return skipMigration(context);
   } else {
-    return runMigration(context, migrations);
+    return runMigration(context);
   }
 }
 
@@ -57,14 +58,23 @@ function skipMigration({ index, log }) {
   return { index, isSkipped: true };
 }
 
-async function runMigration({ index, destIndex, server, callCluster, log, plugins }, migrations) {
+async function runMigration({
+  index,
+  destIndex,
+  callCluster,
+  log,
+  mappings,
+  plugins,
+  scrollSize,
+  unappliedMigrations,
+}) {
   log.info(() => `Migrating from "${index}" to "${destIndex}".`);
-  log.debug(() => `Preparing to run "${index}" migrations ${migrations.map(({ id }) => id).join(', ')}`);
+  log.debug(() => `Preparing to run "${index}" migrations ${unappliedMigrations.map(({ id }) => id).join(', ')}`);
 
   // This is a kibana index-specific call. It *shouldn't* hurt to invoke this
   // regardless of what index is being migrated.
   log.info(() => `Ensuring "${index}" exists.`);
-  await ensureKibanaIndexExists(server, callCluster);
+  await ensureIndexExists(callCluster, index);
 
   log.info(() => `Ensuring "${index}" is an alias.`);
   await convertIndexToAlias(callCluster, index, `${index}-original`);
@@ -76,37 +86,19 @@ async function runMigration({ index, destIndex, server, callCluster, log, plugin
   await cloneIndexSettings(callCluster, index, destIndex);
 
   log.info(() => `Applying mappings to "${destIndex}".`);
-  await applyMappings(callCluster, destIndex, migrations);
+  await applyMappings(callCluster, destIndex, mappings);
 
   log.info(() => `Applying seeds to "${destIndex}".`);
-  await applySeeds(callCluster, log, destIndex, migrations);
+  await applySeeds(callCluster, log, destIndex, unappliedMigrations);
 
   log.info(() => `Applying transforms to "${destIndex}".`);
-  await applyTransforms(callCluster, log, index, destIndex, migrations);
+  await applyTransforms(callCluster, log, index, destIndex, unappliedMigrations, scrollSize);
 
   log.info(() => `Saving migration state to "${destIndex}".`);
-  await saveMigrationState(callCluster, destIndex, migrationState(plugins));
+  await saveMigrationState(callCluster, destIndex, buildMigrationState(plugins, mappings));
 
   log.info(() => `Pointing alias "${index}" to "${destIndex}".`);
   await setAlias(callCluster, index, destIndex);
 
   return { destIndex, index, isSkipped: false };
-}
-
-// Kibana-index-specific function that uses the saved objects client to ensure
-// the Kibana index exists prior to migrations. We need to create the index, as
-// seed and mappings migrations rely on the index existing.
-async function ensureKibanaIndexExists(server, callCluster) {
-  const savedObjectsClient = server.savedObjectsClientFactory({ callCluster });
-
-  try {
-    await savedObjectsClient.create('migration', {
-      checksum: '',
-      plugins: [],
-    }, { id: MIGRATION_STATE_ID });
-  } catch (err) {
-    if (!savedObjectsClient.errors.isConflictError(err)) {
-      throw err;
-    }
-  }
 }

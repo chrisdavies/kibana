@@ -18,7 +18,6 @@ import { savedObjectsMixin } from './saved_objects';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
-import { migrationsMixin } from './migrations';
 
 const rootDir = fromRoot('.');
 
@@ -61,9 +60,6 @@ export default class KbnServer {
 
       // setup saved object routes
       savedObjectsMixin,
-
-      // setup migrations routes
-      migrationsMixin,
 
       // ensure that all bundles are built, or that the
       // watch bundle server is running

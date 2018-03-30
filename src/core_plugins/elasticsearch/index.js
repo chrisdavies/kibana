@@ -7,7 +7,7 @@ import { createAdminCluster } from './lib/create_admin_cluster';
 import { clientLogger } from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
 import filterHeaders from './lib/filter_headers';
-
+import { registerMigrationsApi } from './lib/kibana_index_migrations';
 import { createProxy } from './lib/create_proxy';
 
 const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
@@ -96,6 +96,8 @@ export default function (kibana) {
 
       createDataCluster(server);
       createAdminCluster(server);
+
+      registerMigrationsApi(server);
 
       createProxy(server, 'POST', '/{index}/_search');
       createProxy(server, 'POST', '/_msearch');
