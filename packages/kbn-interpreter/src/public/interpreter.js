@@ -20,33 +20,32 @@
 import { socketInterpreterProvider } from '../common/interpreter/socket_interpret';
 import { serializeProvider } from '../common/lib/serialize';
 import { createHandlers } from './create_handlers';
+import { batchedAjax } from './batched_ajax';
 
-// This should be moved to its own module, and will be where
-// HTTP batching and streaming happens.
-function createAjaxFunction(kbnVersion, basePath) {
-  return async (url, opts = {}) => {
-    const result = await fetch(`${basePath}${url}`, {
-      ...opts,
-      headers: {
-        ...(opts.headers || {}),
-        'kbn-version': kbnVersion,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const response = await result.json();
-
-    if (!result.ok) {
-      throw response;
+// Fetch the list of server-only functions.
+function fetchServerFunctions(kbnVersion, basePath) {
+  return fetch(`${basePath}/api/canvas/fns`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'kbn-version': kbnVersion,
+    },
+  }).then(async r => {
+    const result = await r.json();
+    if (!r.ok) {
+      throw result;
     }
-
-    return response;
-  };
+    return result;
+  });
 }
 
 export async function initializeInterpreter(kbnVersion, basePath, typesRegistry, functionsRegistry) {
-  const ajax = createAjaxFunction(kbnVersion, basePath);
-  const serverFunctionList = await ajax(`/api/canvas/fns`);
+  const ajax = batchedAjax({
+    batchUrl: `${basePath}/api/canvas/batch`,
+    headers: {
+      'kbn-version': kbnVersion,
+    },
+  });
+  const serverFunctionList = await fetchServerFunctions(kbnVersion, basePath);
 
   // For every sever-side function, register a client-side
   // function that matches its definition, but which simply
@@ -57,15 +56,14 @@ export async function initializeInterpreter(kbnVersion, basePath, typesRegistry,
       async fn(context, args) {
         const types = typesRegistry.toJS();
         const { serialize } = serializeProvider(types);
-        const result = await ajax(`/api/canvas/fns/${functionName}`, {
+        return ajax({
+          url: `/api/canvas/fns/${functionName}`,
           method: 'POST',
-          body: JSON.stringify({
+          data: {
             args,
             context: serialize(context),
-          }),
+          },
         });
-
-        return result;
       },
     }));
   });
