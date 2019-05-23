@@ -1,0 +1,203 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xy_suggestions handles two numeric values 1`] = `
+Array [
+  Object {
+    "datasourceSuggestionId": "1",
+    "score": 1,
+    "state": Object {
+      "legend": Object {
+        "isVisible": true,
+        "position": "right",
+      },
+      "seriesType": "bar",
+      "splitSeriesAccessors": Array [],
+      "stackAccessors": Array [],
+      "title": "Avg price of Avg quantity",
+      "x": Object {
+        "accessor": "quantity",
+        "position": "bottom",
+        "showGridlines": false,
+        "title": "Avg quantity",
+      },
+      "y": Object {
+        "accessors": Array [
+          "price",
+        ],
+        "position": "left",
+        "showGridlines": false,
+        "title": "Avg price",
+      },
+    },
+    "title": "Avg price of Avg quantity",
+  },
+]
+`;
+
+exports[`xy_suggestions places non-numeric columns on x 1`] = `
+Array [
+  Object {
+    "datasourceSuggestionId": "1",
+    "score": 1,
+    "state": Object {
+      "legend": Object {
+        "isVisible": true,
+        "position": "right",
+      },
+      "seriesType": "bar",
+      "splitSeriesAccessors": Array [],
+      "stackAccessors": Array [],
+      "title": "Avg num votes of Yes / No",
+      "x": Object {
+        "accessor": "mybool",
+        "position": "bottom",
+        "showGridlines": false,
+        "title": "Yes / No",
+      },
+      "y": Object {
+        "accessors": Array [
+          "num votes",
+        ],
+        "position": "left",
+        "showGridlines": false,
+        "title": "Avg num votes",
+      },
+    },
+    "title": "Avg num votes of Yes / No",
+  },
+]
+`;
+
+exports[`xy_suggestions suggests a basic x y chart with date on x 1`] = `
+Array [
+  Object {
+    "datasourceSuggestionId": "1",
+    "score": 1,
+    "state": Object {
+      "legend": Object {
+        "isVisible": true,
+        "position": "right",
+      },
+      "seriesType": "line",
+      "splitSeriesAccessors": Array [],
+      "stackAccessors": Array [],
+      "title": "Avg bytes over date histogram",
+      "x": Object {
+        "accessor": "date",
+        "position": "bottom",
+        "showGridlines": false,
+        "title": "date histogram",
+      },
+      "y": Object {
+        "accessors": Array [
+          "bytes",
+        ],
+        "position": "left",
+        "showGridlines": false,
+        "title": "Avg bytes",
+      },
+    },
+    "title": "Avg bytes over date histogram",
+  },
+]
+`;
+
+exports[`xy_suggestions suggests a split x y chart with date on x 1`] = `
+Array [
+  Object {
+    "datasourceSuggestionId": "1",
+    "score": 1,
+    "state": Object {
+      "legend": Object {
+        "isVisible": true,
+        "position": "right",
+      },
+      "seriesType": "line",
+      "splitSeriesAccessors": Array [
+        "product",
+      ],
+      "stackAccessors": Array [],
+      "title": "Avg price & Avg quantity over date histogram",
+      "x": Object {
+        "accessor": "date",
+        "position": "bottom",
+        "showGridlines": false,
+        "title": "date histogram",
+      },
+      "y": Object {
+        "accessors": Array [
+          "price",
+          "quantity",
+        ],
+        "position": "left",
+        "showGridlines": false,
+        "title": "Avg price & Avg quantity",
+      },
+    },
+    "title": "Avg price & Avg quantity over date histogram",
+  },
+]
+`;
+
+exports[`xy_suggestions supports multiple suggestions 1`] = `
+Array [
+  Object {
+    "datasourceSuggestionId": "1",
+    "score": 1,
+    "state": Object {
+      "legend": Object {
+        "isVisible": true,
+        "position": "right",
+      },
+      "seriesType": "line",
+      "splitSeriesAccessors": Array [],
+      "stackAccessors": Array [],
+      "title": "Avg price over date histogram",
+      "x": Object {
+        "accessor": "date",
+        "position": "bottom",
+        "showGridlines": false,
+        "title": "date histogram",
+      },
+      "y": Object {
+        "accessors": Array [
+          "price",
+        ],
+        "position": "left",
+        "showGridlines": false,
+        "title": "Avg price",
+      },
+    },
+    "title": "Avg price over date histogram",
+  },
+  Object {
+    "datasourceSuggestionId": "2",
+    "score": 1,
+    "state": Object {
+      "legend": Object {
+        "isVisible": true,
+        "position": "right",
+      },
+      "seriesType": "bar",
+      "splitSeriesAccessors": Array [],
+      "stackAccessors": Array [],
+      "title": "Avg count of Top 5 country",
+      "x": Object {
+        "accessor": "country",
+        "position": "bottom",
+        "showGridlines": false,
+        "title": "Top 5 country",
+      },
+      "y": Object {
+        "accessors": Array [
+          "count",
+        ],
+        "position": "left",
+        "showGridlines": false,
+        "title": "Avg count",
+      },
+    },
+    "title": "Avg count of Top 5 country",
+  },
+]
+`;

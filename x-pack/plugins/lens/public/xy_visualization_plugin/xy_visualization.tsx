@@ -6,19 +6,36 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Visualization, DimensionRole } from '../types';
+import { Position } from '@elastic/charts';
+import { Visualization } from '../types';
+import { getSuggestions } from './xy_suggestions';
+import { XYArgs } from './xy_expression';
 
-export interface XyVisualizationState {
-  roles: DimensionRole[];
-}
+export const xyVisualization: Visualization<XYArgs, XYArgs> = {
+  getSuggestions,
 
-export type XyVisualizationPersistedState = XyVisualizationState;
-
-export const xyVisualization: Visualization<XyVisualizationState, XyVisualizationPersistedState> = {
-  initialize() {
-    return {
-      roles: [],
-    };
+  initialize(state) {
+    return (
+      state || {
+        title: 'Empty line chart',
+        legend: { isVisible: true, position: Position.Right },
+        seriesType: 'line',
+        splitSeriesAccessors: [],
+        stackAccessors: [],
+        x: {
+          accessor: '',
+          position: Position.Bottom,
+          showGridlines: false,
+          title: 'Uknown',
+        },
+        y: {
+          accessors: [],
+          position: Position.Left,
+          showGridlines: false,
+          title: 'Uknown',
+        },
+      }
+    );
   },
 
   getPersistableState(state) {
@@ -28,8 +45,6 @@ export const xyVisualization: Visualization<XyVisualizationState, XyVisualizatio
   renderConfigPanel: (domElement, props) => {
     render(<div>XY Visualization</div>, domElement);
   },
-
-  getSuggestions: options => [],
 
   getMappingOfTableToRoles: (state, datasource) => [],
 
