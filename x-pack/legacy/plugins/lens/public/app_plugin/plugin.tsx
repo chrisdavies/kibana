@@ -29,6 +29,7 @@ import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { SavedObjectIndexStore } from '../persistence';
 import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
 import { metricVisualizationSetup, metricVisualizationStop } from '../metric_visualization_plugin';
+import { blueMetricVisualizationSetup } from '../blue_metric_plugin';
 import {
   datatableVisualizationSetup,
   datatableVisualizationStop,
@@ -78,11 +79,13 @@ export class AppPlugin {
     const datatableVisualization = datatableVisualizationSetup();
     const xyVisualization = xyVisualizationSetup();
     const metricVisualization = metricVisualizationSetup();
+    const blueMetricVisualization = blueMetricVisualizationSetup();
     const editorFrameSetupInterface = editorFrameSetup();
 
     editorFrameSetupInterface.registerVisualization(xyVisualization);
     editorFrameSetupInterface.registerVisualization(datatableVisualization);
     editorFrameSetupInterface.registerVisualization(metricVisualization);
+    editorFrameSetupInterface.registerVisualization(blueMetricVisualization);
     editorFrameSetupInterface.registerDatasource(indexPattern);
 
     kibana_legacy.registerLegacyApp({
